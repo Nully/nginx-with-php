@@ -40,4 +40,12 @@ vars:
   is_production: yes
 ```
 
+開発環境と本番環境で異なるのは
 
+- display_errors
+- error_reporting
+
+の2項目です。
+
+開発環境ではデバッグを行うため、error_reportingをE_NOTICE以上出力し、
+エラーの出力を有効に指定ます。
