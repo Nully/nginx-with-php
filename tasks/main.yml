@@ -1,0 +1,84 @@
+---
+- name: nginxリポジトリの追加
+  sudo: yes
+  yum: name="http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm" state=present
+
+- name: EPELリポジトリの追加
+  sudo: yes
+  yum: name="http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm" state=present
+
+- name: REMIリポジトリの追加
+  sudo: yes
+  yum: name="http://rpms.famillecollet.com/enterprise/remi-release-6.rpm" state=present
+
+- name: nginxのインストール
+  sudo: yes
+  yum: name=nginx state=present
+  notify: restart nginx
+
+- name: phpのインストール
+  yum: name={{item}} state=present enablerepo=remi,epel
+  sudo: yes
+  with_items:
+    - php56
+    - php56-php-cli
+    - php56-php-common
+    - php56-php-devel
+    - php56-php-mbstring
+    - php56-php-mysqlnd
+    - php56-php-pdo
+    - php56-php-xml
+    - php56-php-pecl-xdebug
+
+- name: php-fpmのインストール
+  sudo: yes
+  yum: name=php-fpm state=present enablerepo=remi,epel
+  notify: restart php-fpm
+
+- name: wwwグループの追加
+  sudo: yes
+  group: name={{www.group}} state=present
+
+- name: wwwユーザーの公開ディレクトリ作成
+  sudo: yes
+  file: path={{nginx.doc_root}} state=directory mode=0755 owner={{www.owner}} group={{www.group}}
+
+- name: wwwユーザーの追加
+  sudo: yes
+  user: name={{www.owner}} shell=/bin/bash groups={{www.group}} append=yes password={{www.passwd}} home={{nginx.doc_root}}
+
+- name: nginxの不要な設定ファイルの削除
+  sudo: yes
+  shell: "rm -rf /etc/nginx/conf.d/*"
+
+- name: nginx.confの複製
+  sudo: yes
+  template: src=nginx.conf dest={{nginx.conf_dir}} owner=root group=root
+  notify: restart nginx
+
+- name: php-fpmのグローバル設定を複製
+  sudo: yes
+  template: src=fpm-global.conf dest=/etc/php-fpm.conf owner=root group=root
+  notify: restart php-fpm
+
+- name: php-fpmのユーザー設定を複製
+  sudo: yes
+  template: src=fpm-www.conf dest=/etc/php-fpm.d/www.conf owner=root group=root
+  notify: restart php-fpm
+
+- name: php.iniの設定を複製
+  sudo: yes
+  template: src=php.ini dest=/etc/php.ini owner=root group=root
+  notify: restart php-fpm
+
+- name: nginxのlogrotateを追加
+  sudo: yes
+  template: src=nginx.logrotate dest=/etc/logrotate.d/nginx owner=root group=root
+
+- name: php-fpmのlogrotateを追加
+  sudo: yes
+  template: src=fpm.logrotate dest=/etc/logrotate.d/php-fpm owner=root group=root
+
+
+
+

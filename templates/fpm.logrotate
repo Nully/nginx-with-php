@@ -1,0 +1,11 @@
+{{phpfpm.log_dir}}/*.log {
+  rotate 12
+  weekly
+  missingok
+  notifempty
+  compress
+  delaycompress
+  postrotate
+    [ ! -f {{phpfpm.pid_dir}}/nginx.pid ] || kill -USR1 `cat {{phpfpm.pid_dir}}/nginx.pid`
+  endscript
+}

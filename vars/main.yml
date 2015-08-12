@@ -1,0 +1,16 @@
+---
+nginx:
+  owner: nginx
+  group: nginx
+  conf_dir: /etc/nginx
+  doc_root: /var/www
+
+www:
+  owner: www
+  group: www
+  # change your password
+  passwd: "$6$rounds=656000$NyGUe81Qa3Mk9mEM$rWavGH3vsEmEAjRo3uYSPG00gd9P1WvymDyOB8MO8tAyd.3mBm9J3fPihwDSE4SrnKzyust7vrwJMnoWeMkAj1"
+
+phpfpm:
+  pid_dir: /var/run/php-fpm/
+  log_dir: /var/log/php-fpm/
